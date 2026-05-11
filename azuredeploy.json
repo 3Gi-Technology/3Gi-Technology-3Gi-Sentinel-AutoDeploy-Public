@@ -1,20 +1,23 @@
 {
-  "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
-  "contentVersion": "0.1.3.0",
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "0.2.0.0",
+  "metadata": {
+    "description": "3Gi Microsoft Sentinel AutoDeploy - resource group scoped deployment for Log Analytics workspace and Sentinel onboarding. Resource group is selected or created in the Azure portal Basics tab."
+  },
   "parameters": {
     "clientName": { "type": "string", "metadata": { "description": "Customer/client display name used for tags." } },
     "clientCode": { "type": "string", "metadata": { "description": "Short lowercase client code used in resource names." } },
     "environment": { "type": "string", "defaultValue": "prod", "allowedValues": ["prod", "test", "dev", "lab"] },
     "location": { "type": "string", "defaultValue": "ukwest" },
     "regionCode": { "type": "string", "defaultValue": "ukw" },
-    "resourceGroupName": { "type": "string", "defaultValue": "" },
+    "resourceGroupName": { "type": "string", "defaultValue": "", "metadata": { "description": "Informational only. Create/select the resource group in Azure portal Basics." } },
     "workspaceName": { "type": "string", "defaultValue": "" },
     "retentionInDays": { "type": "int", "defaultValue": 90, "minValue": 30 },
     "dailyQuotaGb": { "type": "int", "defaultValue": -1 },
     "enableSentinelHealth": { "type": "bool", "defaultValue": true },
     "enableUeba": { "type": "bool", "defaultValue": true },
     "uebaIdentityProviders": { "type": "array", "defaultValue": ["AzureActiveDirectory"] },
-    "enableAzureActivity": { "type": "bool", "defaultValue": true },
+    "enableAzureActivity": { "type": "bool", "defaultValue": false },
     "enableEntraDiagnostics": { "type": "bool", "defaultValue": true },
     "entraLogCategories": { "type": "array", "defaultValue": ["AuditLogs", "SignInLogs", "NonInteractiveUserSignInLogs", "ServicePrincipalSignInLogs", "ManagedIdentitySignInLogs"] },
     "enableOffice365Connector": { "type": "bool", "defaultValue": false },
@@ -29,9 +32,9 @@
     "enableJiraIntegration": { "type": "bool", "defaultValue": false }
   },
   "variables": {
-    "resolvedResourceGroupName": "[if(empty(parameters('resourceGroupName')), format('rg-3gi-sentinel-{0}-{1}-{2}', parameters('clientCode'), parameters('environment'), parameters('regionCode')), parameters('resourceGroupName'))]",
     "resolvedWorkspaceName": "[if(empty(parameters('workspaceName')), format('law-3gi-sentinel-{0}-{1}-{2}', parameters('clientCode'), parameters('environment'), parameters('regionCode')), parameters('workspaceName'))]",
     "sentinelWorkspaceDeploymentName": "deploy-3gi-sentinel-workspace",
+    "settingsDeploymentName": "deploy-3gi-sentinel-settings",
     "commonTags": {
       "managedBy": "3Gi",
       "service": "MSSP",
@@ -46,18 +49,9 @@
   },
   "resources": [
     {
-      "type": "Microsoft.Resources/resourceGroups",
-      "apiVersion": "2024-03-01",
-      "name": "[variables('resolvedResourceGroupName')]",
-      "location": "[parameters('location')]",
-      "tags": "[variables('commonTags')]"
-    },
-    {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2022-09-01",
       "name": "[variables('sentinelWorkspaceDeploymentName')]",
-      "resourceGroup": "[variables('resolvedResourceGroupName')]",
-      "dependsOn": ["[resourceId('Microsoft.Resources/resourceGroups', variables('resolvedResourceGroupName'))]"],
       "properties": {
         "mode": "Incremental",
         "templateLink": { "uri": "https://raw.githubusercontent.com/3Gi-Technology/3Gi-Technology-3Gi-Sentinel-AutoDeploy-Public/main/LinkedTemplates/workspace.json", "contentVersion": "0.1.0.0" },
@@ -71,27 +65,10 @@
       }
     },
     {
-      "condition": "[parameters('enableAzureActivity')]",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2022-09-01",
-      "name": "deploy-3gi-subscription-activity-diagnostics",
-      "location": "[parameters('location')]",
-      "dependsOn": ["[resourceId(variables('resolvedResourceGroupName'), 'Microsoft.Resources/deployments', variables('sentinelWorkspaceDeploymentName'))]"],
-      "properties": {
-        "mode": "Incremental",
-        "templateLink": { "uri": "https://raw.githubusercontent.com/3Gi-Technology/3Gi-Technology-3Gi-Sentinel-AutoDeploy-Public/main/LinkedTemplates/diagnostics.subscription.json", "contentVersion": "0.1.1.0" },
-        "parameters": {
-          "workspaceResourceId": { "value": "[resourceId(variables('resolvedResourceGroupName'), 'Microsoft.OperationalInsights/workspaces', variables('resolvedWorkspaceName'))]" },
-          "diagnosticSettingName": { "value": "send-activity-to-sentinel" }
-        }
-      }
-    },
-    {
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
-      "name": "deploy-3gi-sentinel-settings",
-      "resourceGroup": "[variables('resolvedResourceGroupName')]",
-      "dependsOn": ["[resourceId(variables('resolvedResourceGroupName'), 'Microsoft.Resources/deployments', variables('sentinelWorkspaceDeploymentName'))]"],
+      "name": "[variables('settingsDeploymentName')]",
+      "dependsOn": ["[resourceId('Microsoft.Resources/deployments', variables('sentinelWorkspaceDeploymentName'))]"],
       "properties": {
         "mode": "Incremental",
         "templateLink": { "uri": "https://raw.githubusercontent.com/3Gi-Technology/3Gi-Technology-3Gi-Sentinel-AutoDeploy-Public/main/LinkedTemplates/settings.json", "contentVersion": "0.1.0.0" },
@@ -105,9 +82,10 @@
     }
   ],
   "outputs": {
-    "resourceGroupName": { "type": "string", "value": "[variables('resolvedResourceGroupName')]" },
+    "resourceGroupName": { "type": "string", "value": "[resourceGroup().name]" },
     "workspaceName": { "type": "string", "value": "[variables('resolvedWorkspaceName')]" },
     "defenderXdrMode": { "type": "string", "value": "[parameters('defenderXdrMode')]" },
-    "nextSteps": { "type": "string", "value": "Run Scripts/Invoke-3GiValidation.ps1 after deployment and manually complete Defender XDR primary workspace onboarding if required." }
+    "azureActivityNote": { "type": "string", "value": "Azure Activity diagnostic settings are not deployed in v0.2 portal deployment. Configure subscription diagnostic settings after workspace creation." },
+    "nextSteps": { "type": "string", "value": "Validate workspace creation, then configure Azure Activity/Entra diagnostics and Defender XDR onboarding as required." }
   }
 }
