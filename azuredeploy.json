@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-  "contentVersion": "0.1.0.0",
+  "contentVersion": "0.1.1.0",
   "targetScope": "subscription",
   "metadata": {
     "description": "3Gi Microsoft Sentinel AutoDeploy - MSSP landing zone scaffold based on the Sentinel All-In-One deployment pattern with 3Gi naming, tagging, and safer connector defaults."
@@ -39,6 +39,7 @@
   "variables": {
     "resolvedResourceGroupName": "[if(empty(parameters('resourceGroupName')), format('rg-3gi-sentinel-{0}-{1}-{2}', parameters('clientCode'), parameters('environment'), parameters('regionCode')), parameters('resourceGroupName'))]",
     "resolvedWorkspaceName": "[if(empty(parameters('workspaceName')), format('law-3gi-sentinel-{0}-{1}-{2}', parameters('clientCode'), parameters('environment'), parameters('regionCode')), parameters('workspaceName'))]",
+    "sentinelWorkspaceDeploymentName": "deploy-3gi-sentinel-workspace",
     "commonTags": {
       "managedBy": "3Gi",
       "service": "MSSP",
@@ -62,9 +63,9 @@
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2022-09-01",
-      "name": "deploy-3gi-sentinel-workspace",
+      "name": "[variables('sentinelWorkspaceDeploymentName')]",
       "resourceGroup": "[variables('resolvedResourceGroupName')]",
-      "dependsOn": ["[subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('resolvedResourceGroupName'))]"],
+      "dependsOn": ["[resourceId('Microsoft.Resources/resourceGroups', variables('resolvedResourceGroupName'))]"],
       "properties": {
         "mode": "Incremental",
         "templateLink": { "uri": "https://raw.githubusercontent.com/3Gi-Technology/3Gi-Technology-3Gi-Sentinel-AutoDeploy-Public/main/LinkedTemplates/workspace.json", "contentVersion": "0.1.0.0" },
@@ -83,12 +84,12 @@
       "apiVersion": "2022-09-01",
       "name": "deploy-3gi-subscription-activity-diagnostics",
       "location": "[parameters('location')]",
-      "dependsOn": ["deploy-3gi-sentinel-workspace"],
+      "dependsOn": ["[resourceId(variables('resolvedResourceGroupName'), 'Microsoft.Resources/deployments', variables('sentinelWorkspaceDeploymentName'))]"],
       "properties": {
         "mode": "Incremental",
         "templateLink": { "uri": "https://raw.githubusercontent.com/3Gi-Technology/3Gi-Technology-3Gi-Sentinel-AutoDeploy-Public/main/LinkedTemplates/diagnostics.subscription.json", "contentVersion": "0.1.0.0" },
         "parameters": {
-          "workspaceResourceId": { "value": "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resolvedResourceGroupName')), 'Microsoft.OperationalInsights/workspaces', variables('resolvedWorkspaceName'))]" },
+          "workspaceResourceId": { "value": "[resourceId(variables('resolvedResourceGroupName'), 'Microsoft.OperationalInsights/workspaces', variables('resolvedWorkspaceName'))]" },
           "diagnosticSettingName": { "value": "send-activity-to-sentinel" }
         }
       }
@@ -98,7 +99,7 @@
       "apiVersion": "2022-09-01",
       "name": "deploy-3gi-sentinel-settings",
       "resourceGroup": "[variables('resolvedResourceGroupName')]",
-      "dependsOn": ["deploy-3gi-sentinel-workspace"],
+      "dependsOn": ["[resourceId(variables('resolvedResourceGroupName'), 'Microsoft.Resources/deployments', variables('sentinelWorkspaceDeploymentName'))]"],
       "properties": {
         "mode": "Incremental",
         "templateLink": { "uri": "https://raw.githubusercontent.com/3Gi-Technology/3Gi-Technology-3Gi-Sentinel-AutoDeploy-Public/main/LinkedTemplates/settings.json", "contentVersion": "0.1.0.0" },
