@@ -1,0 +1,38 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "0.1.0.0",
+  "parameters": {
+    "workspaceName": { "type": "string" },
+    "location": { "type": "string" },
+    "retentionInDays": { "type": "int", "defaultValue": 90 },
+    "dailyQuotaGb": { "type": "int", "defaultValue": -1 },
+    "tags": { "type": "object", "defaultValue": {} }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.OperationalInsights/workspaces",
+      "apiVersion": "2023-09-01",
+      "name": "[parameters('workspaceName')]",
+      "location": "[parameters('location')]",
+      "tags": "[parameters('tags')]",
+      "properties": {
+        "sku": { "name": "PerGB2018" },
+        "retentionInDays": "[parameters('retentionInDays')]",
+        "workspaceCapping": "[if(greater(parameters('dailyQuotaGb'), 0), createObject('dailyQuotaGb', parameters('dailyQuotaGb')), json('null'))]",
+        "publicNetworkAccessForIngestion": "Enabled",
+        "publicNetworkAccessForQuery": "Enabled"
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/onboardingStates",
+      "apiVersion": "2025-09-01",
+      "name": "[format('{0}/Microsoft.SecurityInsights/default', parameters('workspaceName'))]",
+      "dependsOn": ["[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspaceName'))]"],
+      "properties": {}
+    }
+  ],
+  "outputs": {
+    "workspaceResourceId": { "type": "string", "value": "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspaceName'))]" },
+    "workspaceName": { "type": "string", "value": "[parameters('workspaceName')]" }
+  }
+}
