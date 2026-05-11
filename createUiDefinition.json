@@ -139,7 +139,7 @@
       "defenderXdrMode": "[steps('licensingAndConnectors').defenderXdrMode]",
       "enableThreatIntelligenceConnector": "[steps('licensingAndConnectors').enableThreatIntelligenceConnector]",
       "enableDynamicsConnector": "[steps('licensingAndConnectors').enableDynamicsConnector]",
-      "contentSolutionNames": "[if(empty(steps('contentAndRules').contentSolutionNames), createArray(), split(steps('contentAndRules').contentSolutionNames, ','))]",
+      "contentSolutionNames": "[split(steps('contentAndRules').contentSolutionNames, ',')]",
       "enableAnalyticsRules": "[steps('contentAndRules').enableAnalyticsRules]",
       "analyticsRuleSeverities": "[steps('contentAndRules').analyticsRuleSeverities]",
       "enableJiraIntegration": "[steps('contentAndRules').enableJiraIntegration]"
