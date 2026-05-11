@@ -1,33 +1,25 @@
 {
-  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-  "contentVersion": "0.1.1.0",
-  "targetScope": "subscription",
-  "metadata": {
-    "description": "3Gi Microsoft Sentinel AutoDeploy - MSSP landing zone scaffold based on the Sentinel All-In-One deployment pattern with 3Gi naming, tagging, and safer connector defaults."
-  },
+  "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+  "contentVersion": "0.1.2.0",
   "parameters": {
     "clientName": { "type": "string", "metadata": { "description": "Customer/client display name used for tags." } },
-    "clientCode": { "type": "string", "metadata": { "description": "Short lowercase client code used in resource names, for example ashtons." } },
-    "environment": { "type": "string", "defaultValue": "prod", "allowedValues": ["prod", "test", "dev", "lab"], "metadata": { "description": "Deployment environment." } },
-    "location": { "type": "string", "defaultValue": "ukwest", "metadata": { "description": "Azure region for the resource group and workspace." } },
-    "regionCode": { "type": "string", "defaultValue": "ukw", "metadata": { "description": "Short region code used in resource names." } },
-    "resourceGroupName": { "type": "string", "defaultValue": "", "metadata": { "description": "Optional override. Leave blank to use rg-3gi-sentinel-<clientCode>-<environment>-<regionCode>." } },
-    "workspaceName": { "type": "string", "defaultValue": "", "metadata": { "description": "Optional override. Leave blank to use law-3gi-sentinel-<clientCode>-<environment>-<regionCode>." } },
-    "retentionInDays": { "type": "int", "defaultValue": 90, "minValue": 30, "metadata": { "description": "Log Analytics retention in days." } },
-    "dailyQuotaGb": { "type": "int", "defaultValue": -1, "metadata": { "description": "Daily cap in GB. Use -1 for no cap." } },
+    "clientCode": { "type": "string", "metadata": { "description": "Short lowercase client code used in resource names." } },
+    "environment": { "type": "string", "defaultValue": "prod", "allowedValues": ["prod", "test", "dev", "lab"] },
+    "location": { "type": "string", "defaultValue": "ukwest" },
+    "regionCode": { "type": "string", "defaultValue": "ukw" },
+    "resourceGroupName": { "type": "string", "defaultValue": "" },
+    "workspaceName": { "type": "string", "defaultValue": "" },
+    "retentionInDays": { "type": "int", "defaultValue": 90, "minValue": 30 },
+    "dailyQuotaGb": { "type": "int", "defaultValue": -1 },
     "enableSentinelHealth": { "type": "bool", "defaultValue": true },
     "enableUeba": { "type": "bool", "defaultValue": true },
     "uebaIdentityProviders": { "type": "array", "defaultValue": ["AzureActiveDirectory"] },
     "enableAzureActivity": { "type": "bool", "defaultValue": true },
     "enableEntraDiagnostics": { "type": "bool", "defaultValue": true },
-    "entraLogCategories": {
-      "type": "array",
-      "defaultValue": ["AuditLogs", "SignInLogs", "NonInteractiveUserSignInLogs", "ServicePrincipalSignInLogs", "ManagedIdentitySignInLogs"],
-      "metadata": { "description": "Entra ID diagnostic log categories to send to Sentinel. Requires tenant-level permission to deploy." }
-    },
+    "entraLogCategories": { "type": "array", "defaultValue": ["AuditLogs", "SignInLogs", "NonInteractiveUserSignInLogs", "ServicePrincipalSignInLogs", "ManagedIdentitySignInLogs"] },
     "enableOffice365Connector": { "type": "bool", "defaultValue": false },
     "enableDefenderForCloudConnector": { "type": "bool", "defaultValue": false },
-    "defenderXdrMode": { "type": "string", "defaultValue": "Skip", "allowedValues": ["Skip", "Manual", "PrimaryWorkspaceConfirmed"], "metadata": { "description": "Defender XDR is not enabled blindly. Use Manual or PrimaryWorkspaceConfirmed as an onboarding flag." } },
+    "defenderXdrMode": { "type": "string", "defaultValue": "Skip", "allowedValues": ["Skip", "Manual", "PrimaryWorkspaceConfirmed"] },
     "enableThreatIntelligenceConnector": { "type": "bool", "defaultValue": false },
     "enableDynamicsConnector": { "type": "bool", "defaultValue": false },
     "contentSolutionNames": { "type": "array", "defaultValue": [] },
@@ -65,7 +57,7 @@
       "apiVersion": "2022-09-01",
       "name": "[variables('sentinelWorkspaceDeploymentName')]",
       "resourceGroup": "[variables('resolvedResourceGroupName')]",
-      "dependsOn": ["[resourceId('Microsoft.Resources/resourceGroups', variables('resolvedResourceGroupName'))]"],
+      "dependsOn": ["[subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('resolvedResourceGroupName'))]"],
       "properties": {
         "mode": "Incremental",
         "templateLink": { "uri": "https://raw.githubusercontent.com/3Gi-Technology/3Gi-Technology-3Gi-Sentinel-AutoDeploy-Public/main/LinkedTemplates/workspace.json", "contentVersion": "0.1.0.0" },
@@ -87,7 +79,7 @@
       "dependsOn": ["[resourceId(variables('resolvedResourceGroupName'), 'Microsoft.Resources/deployments', variables('sentinelWorkspaceDeploymentName'))]"],
       "properties": {
         "mode": "Incremental",
-        "templateLink": { "uri": "https://raw.githubusercontent.com/3Gi-Technology/3Gi-Technology-3Gi-Sentinel-AutoDeploy-Public/main/LinkedTemplates/diagnostics.subscription.json", "contentVersion": "0.1.0.0" },
+        "templateLink": { "uri": "https://raw.githubusercontent.com/3Gi-Technology/3Gi-Technology-3Gi-Sentinel-AutoDeploy-Public/main/LinkedTemplates/diagnostics.subscription.json", "contentVersion": "0.1.1.0" },
         "parameters": {
           "workspaceResourceId": { "value": "[resourceId(variables('resolvedResourceGroupName'), 'Microsoft.OperationalInsights/workspaces', variables('resolvedWorkspaceName'))]" },
           "diagnosticSettingName": { "value": "send-activity-to-sentinel" }
