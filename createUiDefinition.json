@@ -51,14 +51,6 @@
         }
       },
       {
-        "name": "location",
-        "type": "Microsoft.Common.LocationSelector",
-        "label": "Region",
-        "toolTip": "Azure region for the Sentinel resource group and workspace.",
-        "resourceTypes": ["Microsoft.OperationalInsights/workspaces"],
-        "defaultValue": "ukwest"
-      },
-      {
         "name": "regionCode",
         "type": "Microsoft.Common.TextBox",
         "label": "Region code",
@@ -202,7 +194,7 @@
       "clientName": "[basics('clientName')]",
       "clientCode": "[basics('clientCode')]",
       "environment": "[basics('environment')]",
-      "location": "[basics('location')]",
+      "location": "[location()]",
       "regionCode": "[basics('regionCode')]",
       "resourceGroupName": "[steps('workspaceSettings').resourceGroupName]",
       "workspaceName": "[steps('workspaceSettings').workspaceName]",
