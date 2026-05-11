@@ -1,7 +1,6 @@
 {
-  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-  "contentVersion": "0.1.0.0",
-  "targetScope": "subscription",
+  "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+  "contentVersion": "0.1.1.0",
   "parameters": {
     "workspaceResourceId": { "type": "string" },
     "diagnosticSettingName": { "type": "string", "defaultValue": "send-activity-to-sentinel" }
@@ -11,7 +10,6 @@
       "type": "Microsoft.Insights/diagnosticSettings",
       "apiVersion": "2021-05-01-preview",
       "name": "[parameters('diagnosticSettingName')]",
-      "scope": "[subscription()]",
       "properties": {
         "workspaceId": "[parameters('workspaceResourceId')]",
         "logs": [
