@@ -1,0 +1,30 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "0.1.0.0",
+  "parameters": {
+    "workspaceName": { "type": "string" },
+    "enableUeba": { "type": "bool", "defaultValue": true },
+    "uebaIdentityProviders": { "type": "array", "defaultValue": ["AzureActiveDirectory"] },
+    "enableSentinelHealth": { "type": "bool", "defaultValue": true }
+  },
+  "resources": [
+    {
+      "condition": "[parameters('enableUeba')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/settings",
+      "apiVersion": "2025-09-01",
+      "name": "[format('{0}/Microsoft.SecurityInsights/Ueba', parameters('workspaceName'))]",
+      "properties": {
+        "dataSources": "[parameters('uebaIdentityProviders')]"
+      }
+    },
+    {
+      "condition": "[parameters('enableSentinelHealth')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/settings",
+      "apiVersion": "2025-09-01",
+      "name": "[format('{0}/Microsoft.SecurityInsights/EntityAnalytics', parameters('workspaceName'))]",
+      "properties": {
+        "entityProviders": ["AzureActiveDirectory"]
+      }
+    }
+  ]
+}
