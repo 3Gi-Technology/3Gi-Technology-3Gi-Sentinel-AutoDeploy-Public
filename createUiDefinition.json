@@ -68,6 +68,22 @@
         "name": "workspaceSettings",
         "label": "Workspace",
         "elements": [
+          {
+            "name": "azureLocation",
+            "type": "Microsoft.Common.DropDown",
+            "label": "Azure deployment region",
+            "defaultValue": "ukwest",
+            "toolTip": "Azure region for the resource group, Log Analytics workspace and Sentinel deployment.",
+            "constraints": {
+              "allowedValues": [
+                { "label": "UK West", "value": "ukwest" },
+                { "label": "UK South", "value": "uksouth" },
+                { "label": "West Europe", "value": "westeurope" },
+                { "label": "North Europe", "value": "northeurope" }
+              ],
+              "required": true
+            }
+          },
           { "name": "resourceGroupName", "type": "Microsoft.Common.TextBox", "label": "Resource group name override", "defaultValue": "", "toolTip": "Leave blank to use rg-3gi-sentinel-<clientCode>-<environment>-<regionCode>." },
           { "name": "workspaceName", "type": "Microsoft.Common.TextBox", "label": "Workspace name override", "defaultValue": "", "toolTip": "Leave blank to use law-3gi-sentinel-<clientCode>-<environment>-<regionCode>." },
           { "name": "retentionInDays", "type": "Microsoft.Common.Slider", "label": "Retention in days", "min": 30, "max": 730, "defaultValue": 90, "showStepMarkers": false },
@@ -194,7 +210,7 @@
       "clientName": "[basics('clientName')]",
       "clientCode": "[basics('clientCode')]",
       "environment": "[basics('environment')]",
-      "location": "[location()]",
+      "location": "[steps('workspaceSettings').azureLocation]",
       "regionCode": "[basics('regionCode')]",
       "resourceGroupName": "[steps('workspaceSettings').resourceGroupName]",
       "workspaceName": "[steps('workspaceSettings').workspaceName]",
