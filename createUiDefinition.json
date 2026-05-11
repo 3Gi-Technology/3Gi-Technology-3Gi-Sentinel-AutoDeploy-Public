@@ -16,7 +16,11 @@
         "label": "Client display name",
         "defaultValue": "",
         "toolTip": "Full customer/client name used for tagging and reporting.",
-        "constraints": { "required": true, "regex": "^[a-zA-Z0-9 ._-]{2,50}$", "validationMessage": "Enter a valid client name." }
+        "constraints": {
+          "required": true,
+          "regex": "^[a-zA-Z0-9 ._-]{2,50}$",
+          "validationMessage": "Enter a valid client name."
+        }
       },
       {
         "name": "clientCode",
@@ -24,7 +28,11 @@
         "label": "Client code",
         "defaultValue": "",
         "toolTip": "Short lowercase code used in resource names, for example ashtons.",
-        "constraints": { "required": true, "regex": "^[a-z0-9-]{2,20}$", "validationMessage": "Use lowercase letters, numbers and hyphens only." }
+        "constraints": {
+          "required": true,
+          "regex": "^[a-z0-9-]{2,20}$",
+          "validationMessage": "Use lowercase letters, numbers and hyphens only."
+        }
       },
       {
         "name": "environment",
@@ -32,7 +40,15 @@
         "label": "Environment",
         "defaultValue": "prod",
         "toolTip": "Deployment environment.",
-        "constraints": { "allowedValues": [ { "label": "Production", "value": "prod" }, { "label": "Test", "value": "test" }, { "label": "Development", "value": "dev" }, { "label": "Lab", "value": "lab" } ], "required": true }
+        "constraints": {
+          "allowedValues": [
+            { "label": "Production", "value": "prod" },
+            { "label": "Test", "value": "test" },
+            { "label": "Development", "value": "dev" },
+            { "label": "Lab", "value": "lab" }
+          ],
+          "required": true
+        }
       },
       {
         "name": "location",
@@ -48,7 +64,11 @@
         "label": "Region code",
         "defaultValue": "ukw",
         "toolTip": "Short region code used in names, for example ukw or uks.",
-        "constraints": { "required": true, "regex": "^[a-z0-9]{2,6}$", "validationMessage": "Use a short lowercase region code." }
+        "constraints": {
+          "required": true,
+          "regex": "^[a-z0-9]{2,6}$",
+          "validationMessage": "Use a short lowercase region code."
+        }
       }
     ],
     "steps": [
@@ -81,17 +101,50 @@
             "label": "Client licence profile",
             "defaultValue": "Custom",
             "toolTip": "Used as an engineer-facing guide for connector selection.",
-            "constraints": { "allowedValues": [ { "label": "Basic Azure Only", "value": "BasicAzureOnly" }, { "label": "Microsoft 365 Business Premium", "value": "M365BusinessPremium" }, { "label": "Microsoft 365 E3", "value": "M365E3" }, { "label": "Microsoft 365 E5", "value": "M365E5" }, { "label": "Defender for Cloud", "value": "DefenderForCloud" }, { "label": "Custom", "value": "Custom" } ], "required": true }
+            "constraints": {
+              "allowedValues": [
+                { "label": "Basic Azure Only", "value": "BasicAzureOnly" },
+                { "label": "Microsoft 365 Business Premium", "value": "M365BusinessPremium" },
+                { "label": "Microsoft 365 E3", "value": "M365E3" },
+                { "label": "Microsoft 365 E5", "value": "M365E5" },
+                { "label": "Defender for Cloud", "value": "DefenderForCloud" },
+                { "label": "Custom", "value": "Custom" }
+              ],
+              "required": true
+            }
           },
           { "name": "enableAzureActivity", "type": "Microsoft.Common.CheckBox", "label": "Enable Azure Activity via diagnostic settings", "defaultValue": true },
           { "name": "enableEntraDiagnostics", "type": "Microsoft.Common.CheckBox", "label": "Enable Entra diagnostic logs", "defaultValue": true },
           {
             "name": "entraLogCategories",
-            "type": "Microsoft.Common.OptionsGroup",
+            "type": "Microsoft.Common.DropDown",
             "label": "Entra log categories",
-            "defaultValue": ["AuditLogs", "SignInLogs", "NonInteractiveUserSignInLogs", "ServicePrincipalSignInLogs", "ManagedIdentitySignInLogs"],
+            "placeholder": "Select one or more Entra log categories",
+            "defaultValue": [
+              { "value": "AuditLogs" },
+              { "value": "SignInLogs" },
+              { "value": "NonInteractiveUserSignInLogs" },
+              { "value": "ServicePrincipalSignInLogs" },
+              { "value": "ManagedIdentitySignInLogs" }
+            ],
             "toolTip": "Select logs to export to the Sentinel workspace where tenant permissions allow it.",
-            "constraints": { "allowedValues": [ { "label": "AuditLogs", "value": "AuditLogs" }, { "label": "SignInLogs", "value": "SignInLogs" }, { "label": "NonInteractiveUserSignInLogs", "value": "NonInteractiveUserSignInLogs" }, { "label": "ServicePrincipalSignInLogs", "value": "ServicePrincipalSignInLogs" }, { "label": "ManagedIdentitySignInLogs", "value": "ManagedIdentitySignInLogs" }, { "label": "ProvisioningLogs", "value": "ProvisioningLogs" }, { "label": "RiskyUsers", "value": "RiskyUsers" }, { "label": "UserRiskEvents", "value": "UserRiskEvents" } ] }
+            "multiselect": true,
+            "selectAll": true,
+            "filter": true,
+            "filterPlaceholder": "Filter log categories...",
+            "constraints": {
+              "allowedValues": [
+                { "label": "AuditLogs", "value": "AuditLogs" },
+                { "label": "SignInLogs", "value": "SignInLogs" },
+                { "label": "NonInteractiveUserSignInLogs", "value": "NonInteractiveUserSignInLogs" },
+                { "label": "ServicePrincipalSignInLogs", "value": "ServicePrincipalSignInLogs" },
+                { "label": "ManagedIdentitySignInLogs", "value": "ManagedIdentitySignInLogs" },
+                { "label": "ProvisioningLogs", "value": "ProvisioningLogs" },
+                { "label": "RiskyUsers", "value": "RiskyUsers" },
+                { "label": "UserRiskEvents", "value": "UserRiskEvents" }
+              ],
+              "required": true
+            }
           },
           { "name": "enableOffice365Connector", "type": "Microsoft.Common.CheckBox", "label": "Enable Office 365 connector", "defaultValue": false },
           { "name": "enableDefenderForCloudConnector", "type": "Microsoft.Common.CheckBox", "label": "Enable Defender for Cloud connector", "defaultValue": false },
@@ -101,7 +154,14 @@
             "label": "Defender XDR handling",
             "defaultValue": "Skip",
             "toolTip": "Do not blindly enable Defender XDR. Use Manual unless primary workspace behaviour has been confirmed.",
-            "constraints": { "allowedValues": [ { "label": "Skip", "value": "Skip" }, { "label": "Manual onboarding step", "value": "Manual" }, { "label": "Primary workspace confirmed", "value": "PrimaryWorkspaceConfirmed" } ], "required": true }
+            "constraints": {
+              "allowedValues": [
+                { "label": "Skip", "value": "Skip" },
+                { "label": "Manual onboarding step", "value": "Manual" },
+                { "label": "Primary workspace confirmed", "value": "PrimaryWorkspaceConfirmed" }
+              ],
+              "required": true
+            }
           },
           { "name": "enableThreatIntelligenceConnector", "type": "Microsoft.Common.CheckBox", "label": "Enable Threat Intelligence connector", "defaultValue": false },
           { "name": "enableDynamicsConnector", "type": "Microsoft.Common.CheckBox", "label": "Enable Dynamics connector", "defaultValue": false }
@@ -113,7 +173,27 @@
         "elements": [
           { "name": "contentSolutionNames", "type": "Microsoft.Common.TextBox", "label": "Content Hub solutions", "defaultValue": "", "toolTip": "Comma-separated solution names. v0.1 records this selection; solution install automation will be implemented in the next iteration." },
           { "name": "enableAnalyticsRules", "type": "Microsoft.Common.CheckBox", "label": "Enable analytics rules", "defaultValue": false },
-          { "name": "analyticsRuleSeverities", "type": "Microsoft.Common.OptionsGroup", "label": "Analytics rule severities", "defaultValue": ["High", "Medium"], "constraints": { "allowedValues": [ { "label": "High", "value": "High" }, { "label": "Medium", "value": "Medium" }, { "label": "Low", "value": "Low" }, { "label": "Informational", "value": "Informational" } ] } },
+          {
+            "name": "analyticsRuleSeverities",
+            "type": "Microsoft.Common.DropDown",
+            "label": "Analytics rule severities",
+            "defaultValue": [
+              { "value": "High" },
+              { "value": "Medium" }
+            ],
+            "toolTip": "Select one or more analytics rule severities.",
+            "multiselect": true,
+            "selectAll": true,
+            "constraints": {
+              "allowedValues": [
+                { "label": "High", "value": "High" },
+                { "label": "Medium", "value": "Medium" },
+                { "label": "Low", "value": "Low" },
+                { "label": "Informational", "value": "Informational" }
+              ],
+              "required": true
+            }
+          },
           { "name": "enableJiraIntegration", "type": "Microsoft.Common.CheckBox", "label": "Enable Jira/PSA integration placeholder", "defaultValue": false }
         ]
       }
