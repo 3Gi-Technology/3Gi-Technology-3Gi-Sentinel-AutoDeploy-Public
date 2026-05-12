@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-  "contentVersion": "0.2.0.0",
+  "contentVersion": "0.2.1.0",
   "metadata": {
     "description": "3Gi Microsoft Sentinel AutoDeploy - resource group scoped deployment for Log Analytics workspace and Sentinel onboarding. Resource group is selected or created in the Azure portal Basics tab."
   },
@@ -71,7 +71,7 @@
       "dependsOn": ["[resourceId('Microsoft.Resources/deployments', variables('sentinelWorkspaceDeploymentName'))]"],
       "properties": {
         "mode": "Incremental",
-        "templateLink": { "uri": "https://raw.githubusercontent.com/3Gi-Technology/3Gi-Technology-3Gi-Sentinel-AutoDeploy-Public/main/LinkedTemplates/settings.json", "contentVersion": "0.1.0.0" },
+        "templateLink": { "uri": "https://raw.githubusercontent.com/3Gi-Technology/3Gi-Technology-3Gi-Sentinel-AutoDeploy-Public/main/LinkedTemplates/settings.json", "contentVersion": "0.1.1.0" },
         "parameters": {
           "workspaceName": { "value": "[variables('resolvedWorkspaceName')]" },
           "enableUeba": { "value": "[parameters('enableUeba')]" },
